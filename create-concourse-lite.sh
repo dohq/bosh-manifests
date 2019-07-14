@@ -38,7 +38,6 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -v default_key_name=${DEFAULT_KEY_NAME} \
   -v default_security_groups=${DEFAULT_SECURITY_GROUPS} \
   -v external_host=${PUBLIC_IP} \
-  -v external_url="https://${PUBLIC_IP}" \
   --var-file private_key=bosh.pem \
   --vars-store concourse-creds.yml \
   --state concourse-state.json
