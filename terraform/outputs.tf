@@ -22,6 +22,10 @@ output "vms_security_group" {
   value = ["${openstack_networking_secgroup_v2.vms_seruciry_group.name}"]
 }
 
+output "lite_security_group" {
+  value = ["${openstack_networking_secgroup_v2.lite_seruciry_group.name}"]
+}
+
 output "default_key_name" {
   value = "${openstack_compute_keypair_v2.bosh.name}"
 }

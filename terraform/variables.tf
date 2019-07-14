@@ -42,3 +42,6 @@ variable "keypair_suffix" {
 variable "security_group_suffix" {
   default = ""
 }
+
+# CIDR vers
+variable "flat_cidr" {}
