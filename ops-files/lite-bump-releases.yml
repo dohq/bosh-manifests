@@ -5,9 +5,3 @@
     version: "43"
     url: "https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=43"
     sha1: "b9bd5fa8f06436e7b055620d3259877907f6d99a"
-
-- type: replace
-  path: /resource_pools/name=vms/stemcell
-  value:
-    url: https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-xenial-go_agent?v=315.41
-    sha1: 87880fc81654ff2b377592fb53c377ead418a908
