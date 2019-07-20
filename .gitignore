@@ -45,3 +45,4 @@ plan
 *-state.json
 *-creds.yml
 *-openrc.sh
+.envrc
