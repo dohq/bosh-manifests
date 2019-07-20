@@ -1,5 +1,5 @@
 # common
-export INTERNAL_CIDR=$(jq -r '.outputs.lite_internal_cidr.value' ${TFSTATE})
+export INTERNAL_CIDR=$(jq -r '.outputs.internal_cidr.value' ${TFSTATE})
 export INTERNAL_GW=$(jq -r '.outputs.internal_gw.value' ${TFSTATE})
 export NET_ID=$(jq -r '.outputs.net_id.value' ${TFSTATE})
 export DEFAULT_KEY_NAME=$(jq -cr '.outputs.default_key_name.value' ${TFSTATE})
