@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export INTERNAL_CIDR=$(jq -r '.outputs.internal_cidr.value' ${TFSTATE})
-export INTERNAL_GW=$(jq -r '.outputs.internal_gw.value' ${TFSTATE})
-export INTERNAL_IP=$(jq -r '.outputs.internal_ip.value' ${TFSTATE})
-export PUBLIC_IP=$(jq -r '.outputs.lite_concourse_external_ip.value' ${TFSTATE})
-export NET_ID=$(jq -r '.outputs.net_id.value' ${TFSTATE})
-export DEFAULT_SECURITY_GROUPS=$(jq -cr '.outputs.lite_security_group.value' ${TFSTATE})
-export DEFAULT_KEY_NAME=$(jq -cr '.outputs.default_key_name.value' ${TFSTATE})
+# source common env
+source ./bosh-env.sh
 
 # export BOSH_LOG_LEVEL=debug
-# bosh int concourse-bosh-deployment/lite/concourse.yml \
 # bosh delete-env concourse-bosh-deployment/lite/concourse.yml \
+# bosh int concourse-bosh-deployment/lite/concourse.yml \
 bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -l concourse-bosh-deployment/versions.yml \
   -o concourse-bosh-deployment/lite/infrastructures/openstack.yml \
@@ -23,10 +18,11 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -o ops-files/lite-instance-size.yml \
   -o ops-files/lite-readable-vm-names.yml \
   -o ops-files/lite-networks.yml \
+  -o ops-files/syslog.yml \
   -v internal_cidr=${INTERNAL_CIDR} \
   -v internal_gw=${INTERNAL_GW} \
-  -v internal_ip=${INTERNAL_IP} \
-  -v public_ip=${PUBLIC_IP} \
+  -v internal_ip=${LITE_INTERNAL_IP} \
+  -v public_ip=${LITE_PUBLIC_IP} \
   -v az=nova \
   -v net_id=${NET_ID} \
   -v auth_url=${OS_AUTH_URL} \
@@ -36,8 +32,11 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -v openstack_project=${OS_PROJECT_NAME} \
   -v region=${OS_REGION_NAME} \
   -v default_key_name=${DEFAULT_KEY_NAME} \
-  -v default_security_groups=${DEFAULT_SECURITY_GROUPS} \
-  -v external_host=${PUBLIC_IP} \
+  -v default_security_groups=${LITE_DEFAULT_SECURITY_GROUPS} \
+  -v external_host=${LITE_PUBLIC_IP} \
+  -v syslog_address=${SYSLOG_HOST} \
+  -v syslog_port=${SYSLOG_PORT} \
+  -v syslog_transport=tcp \
   --var-file private_key=bosh.pem \
   --vars-store concourse-creds.yml \
   --state concourse-state.json
