@@ -10,8 +10,12 @@ output "net_id" {
   value = "${openstack_networking_network_v2.private.id}"
 }
 
-output "internal_ip" {
+output "lite_internal_ip" {
   value = "${cidrhost(openstack_networking_subnet_v2.private_subnet.cidr, 10)}"
+}
+
+output "bosh_internal_ip" {
+  value = "${cidrhost(openstack_networking_subnet_v2.private_subnet.cidr, 15)}"
 }
 
 output "router_id" {
