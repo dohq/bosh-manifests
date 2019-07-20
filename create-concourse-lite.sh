@@ -18,6 +18,7 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -o ops-files/lite-instance-size.yml \
   -o ops-files/lite-readable-vm-names.yml \
   -o ops-files/lite-networks.yml \
+  -o ops-files/lite-colocate-uaa-credhub.yml \
   -o ops-files/syslog.yml \
   -v internal_cidr=${INTERNAL_CIDR} \
   -v internal_gw=${INTERNAL_GW} \
@@ -40,3 +41,6 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   --var-file private_key=bosh.pem \
   --vars-store concourse-creds.yml \
   --state concourse-state.json
+
+# upload object storage creds
+mc cp concourse-{creds.yml,state.json} "${LITE_CREDS_BUCKET}"
