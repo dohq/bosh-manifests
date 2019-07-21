@@ -25,8 +25,8 @@ bosh create-env bosh-deployment/bosh.yml \
   -v region=${OS_REGION_NAME} \
   -v default_key_name=${DEFAULT_KEY_NAME} \
   -v default_security_groups=${BOSH_DEFAULT_SECURITY_GROUPS} \
-  -v syslog_address=elk.dohq.tld \
-  -v syslog_port=5000 \
+  -v syslog_address=${SYSLOG_HOST} \
+  -v syslog_port=${SYSLOG_PORT} \
   -v syslog_transport=tcp \
   --var-file private_key=bosh.pem \
   --state bosh-state.json \
