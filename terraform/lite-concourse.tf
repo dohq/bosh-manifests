@@ -54,12 +54,22 @@ resource "openstack_networking_secgroup_rule_v2" "lite_bosh_director" {
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "lite_bosh_https" {
+resource "openstack_networking_secgroup_rule_v2" "lite_https" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
   port_range_min    = 443
   port_range_max    = 443
+  remote_ip_prefix  = "${var.flat_cidr}"
+  security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "lite_uaa" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 8443
+  port_range_max    = 8443
   remote_ip_prefix  = "${var.flat_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
