@@ -51,4 +51,6 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   $@
 
 # upload object storage creds
-mc cp concourse-{creds.yml,state.json} "${LITE_CREDS_BUCKET}"
+DATE=$(date '+%Y%m%d%H%M%S')
+mc cp concourse-creds.yml "${LITE_CREDS_BUCKET}"/concourse-creds-${DATE}.yml
+mc cp concourse-state.json "${LITE_CREDS_BUCKET}"/concourse-state-${DATE}.json
