@@ -5,3 +5,11 @@
     version: "43"
     url: "https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=43"
     sha1: "b9bd5fa8f06436e7b055620d3259877907f6d99a"
+
+- type: replace
+  path: /releases/name=bpm
+  value:
+    name: "bpm"
+    version: "1.1.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.0"
+    sha1: "82e83a5e8ebd6e07f6ca0765e94eb69e03324a19"
