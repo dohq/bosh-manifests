@@ -17,7 +17,9 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -o ops-files/lite-instance-size.yml \
   -o ops-files/lite-readable-vm-names.yml \
   -o ops-files/lite-networks.yml \
-  -o ops-files/lite-colocate-uaa-credhub.yml \
+  -o ops-files/lite-uaa.yml \
+  -o ops-files/lite-credhub.yml \
+  -o ops-files/lite-add-credhub-users.yml \
   -o ops-files/syslog.yml \
   -v internal_cidr=${INTERNAL_CIDR} \
   -v internal_gw=${INTERNAL_GW} \
