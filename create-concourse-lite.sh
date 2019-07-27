@@ -39,9 +39,16 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -v syslog_address=${SYSLOG_HOST} \
   -v syslog_port=${SYSLOG_PORT} \
   -v syslog_transport=tcp \
+  -v github_client.username=${GITHUB_CLIENT} \
+  -v github_client.password=${GITHUB_SECRET} \
+  -v main_team.github_users=${GITHUB_USERNAME} \
+  -v main_team.github_orgs=main \
+  -v main_team.github_teams=main \
+  -v credhub_client_id=atc_to_credhub \
   --var-file private_key=bosh.pem \
   --vars-store concourse-creds.yml \
-  --state concourse-state.json
+  --state concourse-state.json \
+  $@
 
 # upload object storage creds
 mc cp concourse-{creds.yml,state.json} "${LITE_CREDS_BUCKET}"
