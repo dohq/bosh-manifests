@@ -5,8 +5,6 @@ set -euo pipefail
 source ./bosh-env.sh
 
 # export BOSH_LOG_LEVEL=debug
-# bosh delete-env concourse-bosh-deployment/lite/concourse.yml \
-# bosh int concourse-bosh-deployment/lite/concourse.yml \
 bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -l concourse-bosh-deployment/versions.yml \
   -o concourse-bosh-deployment/lite/infrastructures/openstack.yml \
@@ -14,6 +12,7 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -o <(sed 's|/instance_groups/name=web|/instance_groups/name=concourse|g' concourse-bosh-deployment/cluster/operations/tls-vars.yml) \
   -o <(sed 's|/instance_groups/name=web|/instance_groups/name=concourse|g' concourse-bosh-deployment/cluster/operations/tls.yml) \
   -o <(sed 's|/instance_groups/name=web|/instance_groups/name=concourse|g' concourse-bosh-deployment/cluster/operations/privileged-https.yml) \
+  -o <(sed 's|/instance_groups/name=web|/instance_groups/name=concourse|g' concourse-bosh-deployment/cluster/operations/github-auth.yml) \
   -o ops-files/lite-bump-releases.yml \
   -o ops-files/lite-instance-size.yml \
   -o ops-files/lite-readable-vm-names.yml \
