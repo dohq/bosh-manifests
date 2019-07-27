@@ -1,0 +1,95 @@
+- type: replace
+  path: /releases/-
+  value:
+    name: "credhub"
+    version: "2.5.0"
+    url: "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.5.0"
+    sha1: "89c5ab853980fbfa4525e04851766cb3e0e3f8c5"
+
+# use credhub
+- type: replace
+  path: /instance_groups/name=concourse/jobs/name=web/properties/credhub?
+  value:
+    url: https://127.0.0.1:8844
+    client_id: ((credhub_client_id))
+    client_secret: ((credhub_client_secret))
+    tls: {insecure_skip_verify: true}
+
+# Credhub
+- type: replace
+  path: /instance_groups/name=concourse/jobs/-
+  value:
+    name: credhub
+    release: credhub
+    properties:
+      credhub:
+        tls: ((credhub_tls))
+        authentication:
+          uaa:
+            url: https://((public_ip)):8443
+            ca_certs:
+            - ((uaa_tls.ca))
+            verification_key: ((uaa_jwt.public_key))
+        authorization:
+          acls:
+            enabled: false
+        data_storage:
+          type: postgres
+          host: 127.0.0.1
+          port: 5432
+          require_tls: false
+          database: credhub
+          username: credhub
+          password: ((credhub_db_password))
+        encryption:
+          keys:
+          - active: true
+            key_properties:
+              encryption_password: ((credhub_encryption_password))
+            provider_name: internal
+          providers:
+          - name: internal
+            type: internal
+
+# Add databases
+- type: replace
+  path: /instance_groups/name=concourse/jobs/name=postgres/properties/databases/databases/-
+  value:
+    name: credhub
+
+- type: replace
+  path: /instance_groups/name=concourse/jobs/name=postgres/properties/databases/roles/-
+  value:
+    name: credhub
+    password: ((credhub_db_password))
+
+# variables
+- type: replace
+  path: /variables/-
+  value:
+    name: credhub_ca
+    options:
+      common_name: CredHub CA
+      is_ca: true
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: credhub_tls
+    options:
+      ca: credhub_ca
+      common_name: 127.0.0.1:8844
+      alternative_names:
+      - ((public_ip))
+      - ((internal_ip))
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: credhub_encryption_password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: credhub_db_password
+    type: password
