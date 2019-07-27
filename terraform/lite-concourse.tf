@@ -73,3 +73,13 @@ resource "openstack_networking_secgroup_rule_v2" "lite_uaa" {
   remote_ip_prefix  = "${var.flat_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
+
+resource "openstack_networking_secgroup_rule_v2" "lite_credhub" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 8844
+  port_range_max    = 8844
+  remote_ip_prefix  = "${var.flat_cidr}"
+  security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
+}
