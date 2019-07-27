@@ -12,6 +12,7 @@ bosh create-env bosh-deployment/bosh.yml \
   -o bosh-deployment/credhub.yml \
   -o bosh-deployment/syslog.yml \
   -o ops-files/lite-instance-size.yml \
+  -v director_name=bosh \
   -v az=nova \
   -v net_id=${NET_ID} \
   -v auth_url=${OS_AUTH_URL} \
