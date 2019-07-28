@@ -4,5 +4,5 @@
 - type: replace
   path: /networks/name=default/subnets/0/dns?
   value:
-    - 172.16.0.1
+    - 192.168.1.1
     - 8.8.8.8

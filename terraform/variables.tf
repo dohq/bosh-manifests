@@ -4,7 +4,7 @@ variable "ext_net_id" {}
 variable "availability_zone" {}
 
 variable "dns_nameservers" {
-  default = ["172.16.0.1", "8.8.8.8"]
+  default = ["192.168.1.1", "8.8.8.8"]
   type    = "list"
 }
 
