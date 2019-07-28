@@ -21,6 +21,7 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -o ops-files/lite-credhub.yml \
   -o ops-files/lite-add-credhub-users.yml \
   -o ops-files/syslog.yml \
+  -o ops-files/dns.yml \
   -v internal_cidr=${INTERNAL_CIDR} \
   -v internal_gw=${INTERNAL_GW} \
   -v internal_ip=${LITE_INTERNAL_IP} \
