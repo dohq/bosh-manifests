@@ -32,8 +32,8 @@ bosh create-env bosh-deployment/bosh.yml \
   -v syslog_address=${SYSLOG_HOST} \
   -v syslog_port=${SYSLOG_PORT} \
   -v syslog_transport=tcp \
-  -v internal_dns=((internal_dns)) \
-  -v internal_ntp=((internal_ntp)) \
+  -v internal_dns=${INTERNAL_DNS} \
+  -v internal_ntp=${INTERNAL_NTP} \
   --var-file private_key=bosh.pem \
   --state bosh-state.json \
   --vars-store bosh-creds.yml \
