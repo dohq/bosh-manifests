@@ -44,4 +44,7 @@ variable "security_group_suffix" {
 }
 
 # CIDR vers
-variable "flat_cidr" {}
+variable "provider_cidr" {}
+variable "private_cidr" {}
+variable "management_cidr" {}
+variable "management_gw" {}
