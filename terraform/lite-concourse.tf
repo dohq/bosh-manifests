@@ -20,7 +20,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_icmp" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "icmp"
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
@@ -30,7 +30,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_ssh" {
   protocol          = "tcp"
   port_range_min    = 22
   port_range_max    = 22
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
@@ -40,7 +40,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_bosh_agent" {
   protocol          = "tcp"
   port_range_min    = 6868
   port_range_max    = 6868
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
@@ -50,7 +50,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_bosh_director" {
   protocol          = "tcp"
   port_range_min    = 25555
   port_range_max    = 25555
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
@@ -60,7 +60,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_https" {
   protocol          = "tcp"
   port_range_min    = 443
   port_range_max    = 443
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
@@ -70,7 +70,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_uaa" {
   protocol          = "tcp"
   port_range_min    = 8443
   port_range_max    = 8443
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
@@ -80,7 +80,7 @@ resource "openstack_networking_secgroup_rule_v2" "lite_credhub" {
   protocol          = "tcp"
   port_range_min    = 8844
   port_range_max    = 8844
-  remote_ip_prefix  = "${var.flat_cidr}"
+  remote_ip_prefix  = "${var.provider_cidr}"
   security_group_id = "${openstack_networking_secgroup_v2.lite_seruciry_group.id}"
 }
 
