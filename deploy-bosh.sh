@@ -11,8 +11,10 @@ bosh create-env bosh-deployment/bosh.yml \
   -o bosh-deployment/uaa.yml \
   -o bosh-deployment/credhub.yml \
   -o bosh-deployment/syslog.yml \
+  -o bosh-deployment/misc/dns.yml \
+  -o bosh-deployment/misc/cpi-resize-disk.yml \
+  -o bosh-deployment/misc/ntp.yml \
   -o ops-files/lite-instance-size.yml \
-  -o ops-files/dns.yml \
   -v director_name=bosh \
   -v az=nova \
   -v net_id=${NET_ID} \
@@ -30,6 +32,8 @@ bosh create-env bosh-deployment/bosh.yml \
   -v syslog_address=${SYSLOG_HOST} \
   -v syslog_port=${SYSLOG_PORT} \
   -v syslog_transport=tcp \
+  -v internal_dns=((internal_dns)) \
+  -v internal_ntp=((internal_ntp)) \
   --var-file private_key=bosh.pem \
   --state bosh-state.json \
   --vars-store bosh-creds.yml \
