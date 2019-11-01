@@ -1,5 +1,11 @@
-provider "openstack" {
+provider "openstack" {}
 
+provider "environment" {}
+
+data "environment_variable" "HOME" {
+  name                = "HOME"
+  fail_if_empty       = true
+  normalize_file_path = true
 }
 
 terraform {

@@ -1,18 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# source common env
-source ./bosh-env.sh
+# get tf_output
+pushd terraform/
+tf_output=$(terraform output -json)
+INTERNAL_CIDR=$(echo $tf_output | jq -r '.internal_cidr.value')
+INTERNAL_GW=$(echo $tf_output | jq -r '.internal_gw.value')
+BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')
+NET_ID=$(echo $tf_output | jq -r '.internal_net_id.value')
+DEFAULT_KEY_NAME=$(echo $tf_output | jq -r '.vms_keypair_name.value')
+DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.vms_secgroup_name.value')
+popd
 
 # export BOSH_LOG_LEVEL=debug
+# bosh delete-env bosh-deployment/bosh.yml \
+# bosh int bosh-deployment/bosh.yml \
 bosh create-env bosh-deployment/bosh.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/jumpbox-user.yml \
   -o bosh-deployment/uaa.yml \
   -o bosh-deployment/credhub.yml \
-  -o bosh-deployment/syslog.yml \
-  -o bosh-deployment/misc/dns.yml \
-  -o bosh-deployment/misc/ntp.yml \
   -o bosh-deployment/misc/cpi-resize-disk.yml \
   -o ops-files/lite-instance-size.yml \
   -v director_name=bosh \
@@ -28,13 +35,7 @@ bosh create-env bosh-deployment/bosh.yml \
   -v internal_gw=${INTERNAL_GW} \
   -v internal_ip=${BOSH_INTERNAL_IP} \
   -v default_key_name=${DEFAULT_KEY_NAME} \
-  -v default_security_groups=${BOSH_DEFAULT_SECURITY_GROUPS} \
-  -v syslog_address=${SYSLOG_HOST} \
-  -v syslog_port=${SYSLOG_PORT} \
-  -v syslog_transport=tcp \
-  -v internal_dns=[${INTERNAL_DNS}] \
-  -v internal_ntp=[${INTERNAL_NTP}] \
+  -v default_security_groups=[${DEFAULT_SECURITY_GROUPS}] \
   --var-file private_key=bosh.pem \
-  --state bosh-state.json \
   --vars-store bosh-creds.yml \
-  $@
+  --state bosh-state.json $@
