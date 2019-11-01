@@ -1,39 +1,31 @@
+output "tfstate_bucket" {
+  value = "dohq-openstack-tfstate"
+}
+
+output "internal_net_id" {
+  value = "${openstack_networking_network_v2.internal.id}"
+}
+
 output "internal_cidr" {
-  value = "${openstack_networking_subnet_v2.private_subnet.cidr}"
+  value = "${openstack_networking_subnet_v2.internal-subnet.cidr}"
 }
 
 output "internal_gw" {
-  value = "${openstack_networking_subnet_v2.private_subnet.gateway_ip}"
+  value = "${openstack_networking_subnet_v2.internal-subnet.gateway_ip}"
 }
 
-output "net_id" {
-  value = "${openstack_networking_network_v2.private.id}"
+output "concourse_lite_internal_ip" {
+  value = "${cidrhost(openstack_networking_subnet_v2.internal-subnet.cidr, 5)}"
 }
 
-output "lite_internal_ip" {
-  value = "${cidrhost(openstack_networking_subnet_v2.private_subnet.cidr, 10)}"
+output "concourse_lite_fip" {
+  value = "${openstack_networking_floatingip_v2.concourse-lite.address}"
 }
 
-output "bosh_internal_ip" {
-  value = "${cidrhost(openstack_networking_subnet_v2.private_subnet.cidr, 15)}"
-}
-
-output "router_id" {
-  value = "${openstack_networking_router_v2.router.id}"
-}
-
-output "vms_security_group" {
-  value = ["${openstack_networking_secgroup_v2.vms_seruciry_group.name}"]
-}
-
-output "lite_security_group" {
-  value = ["${openstack_networking_secgroup_v2.lite_seruciry_group.name}"]
-}
-
-output "default_key_name" {
+output "bosh_keypair_name" {
   value = "${openstack_compute_keypair_v2.bosh.name}"
 }
 
-output "lite_concourse_external_ip" {
-  value = "${openstack_networking_floatingip_v2.lite_concourse.address}"
+output "bosh_secgroup_name" {
+  value = "${openstack_networking_secgroup_v2.vms.name}"
 }
