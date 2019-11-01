@@ -14,6 +14,7 @@ LITE_DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.bosh_secgroup_name.valu
 popd
 
 # export BOSH_LOG_LEVEL=debug
+# bosh int concourse-bosh-deployment/lite/concourse.yml \
 # bosh delete-env concourse-bosh-deployment/lite/concourse.yml \
 bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -l concourse-bosh-deployment/versions.yml \
@@ -53,7 +54,6 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -v credhub_client_id=atc_to_credhub \
   --var-file private_key=bosh.pem \
   --vars-store concourse-creds.yml \
-  --state concourse-state.json \
-  $@
+  --state concourse-state.json $@
 
 echo "https://${LITE_PUBLIC_IP}"

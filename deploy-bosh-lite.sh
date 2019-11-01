@@ -17,7 +17,7 @@ bosh create-env bosh-deployment/bosh.yml \
   --vars-store ${PWD}/bosh-lite-creds.yml \
   --state ${PWD}/bosh-lite-state.json
 
-if [[ $(ip route | grep 192.168.50.6 | wc -l) -e 0 ]]; then
+if [[ $(ip route | grep 192.168.50.6 | wc -l) -eq 0 ]]; then
   sudo ip route add 10.244.0.0/16 via 192.168.50.6
 fi
 cat > .bosh-lite-envrc <<EOF
