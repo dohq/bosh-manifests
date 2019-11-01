@@ -2,7 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source ./bosh-env.sh
+# get tf_output
+pushd terraform/
+tf_output=$(terraform output -json)
+LITE_PUBLIC_IP=$(echo $tf_output | jq -r '.concourse_lite_fip.value')
+popd
 
 # uaac target "${LITE_PUBLIC_IP}":8443 --skip-ssl-validation
 uaac target https://"${LITE_PUBLIC_IP}":8443 --ca-cert <(bosh int ./concourse-creds.yml --path /uaa_tls/ca)
