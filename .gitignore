@@ -46,3 +46,4 @@ plan
 *-creds.yml
 *-openrc.sh
 .envrc
+stemcells/*.tgz
