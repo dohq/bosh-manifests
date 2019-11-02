@@ -50,6 +50,15 @@ resource "openstack_networking_secgroup_rule_v2" "jumpbox-egress" {
   remote_ip_prefix = "0.0.0.0/0"
 }
 
+resource "openstack_networking_secgroup_rule_v2" "jumpbox-icmp" {
+  security_group_id = "${openstack_networking_secgroup_v2.jumpbox.id}"
+
+  direction        = "ingress"
+  ethertype        = "IPv4"
+  protocol         = "icmp"
+  remote_ip_prefix = "192.168.1.0/24"
+}
+
 resource "openstack_networking_secgroup_rule_v2" "jumpbox-ssh" {
   security_group_id = "${openstack_networking_secgroup_v2.jumpbox.id}"
 
@@ -61,7 +70,7 @@ resource "openstack_networking_secgroup_rule_v2" "jumpbox-ssh" {
   remote_ip_prefix = "192.168.1.0/24"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "jumpbox-bosh" {
+resource "openstack_networking_secgroup_rule_v2" "jumpbox-bosh-agent" {
   security_group_id = "${openstack_networking_secgroup_v2.jumpbox.id}"
 
   direction        = "ingress"
@@ -72,11 +81,13 @@ resource "openstack_networking_secgroup_rule_v2" "jumpbox-bosh" {
   remote_ip_prefix = "192.168.1.0/24"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "jumpbox-icmp" {
+resource "openstack_networking_secgroup_rule_v2" "jumpbox-https" {
   security_group_id = "${openstack_networking_secgroup_v2.jumpbox.id}"
 
   direction        = "ingress"
   ethertype        = "IPv4"
-  protocol         = "icmp"
+  protocol         = "tcp"
+  port_range_min   = 443
+  port_range_max   = 443
   remote_ip_prefix = "192.168.1.0/24"
 }
