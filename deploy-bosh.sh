@@ -13,9 +13,9 @@ DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.vms_secgroup_name.value')
 popd
 
 # export BOSH_LOG_LEVEL=debug
-# bosh delete-env bosh-deployment/bosh.yml \
 # bosh int bosh-deployment/bosh.yml \
-bosh create-env bosh-deployment/bosh.yml \
+# bosh create-env bosh-deployment/bosh.yml \
+bosh delete-env bosh-deployment/bosh.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/jumpbox-user.yml \
   -o bosh-deployment/uaa.yml \

@@ -1,14 +1,19 @@
-# common
-export INTERNAL_CIDR=$(jq -r '.outputs.internal_cidr.value' ${TFSTATE})
-export INTERNAL_GW=$(jq -r '.outputs.internal_gw.value' ${TFSTATE})
-export NET_ID=$(jq -r '.outputs.net_id.value' ${TFSTATE})
-export DEFAULT_KEY_NAME=$(jq -cr '.outputs.default_key_name.value' ${TFSTATE})
+pushd terraform/
+tf_output=$(terraform output -json)
 
-# Concourse lite
-export LITE_INTERNAL_IP=$(jq -r '.outputs.lite_internal_ip.value' ${TFSTATE})
-export LITE_PUBLIC_IP=$(jq -r '.outputs.lite_concourse_external_ip.value' ${TFSTATE})
-export LITE_DEFAULT_SECURITY_GROUPS=$(jq -cr '.outputs.lite_security_group.value' ${TFSTATE})
+# common
+export INTERNAL_CIDR=$(echo $tf_output | jq -r '.internal_cidr.value')
+export INTERNAL_GW=$(echo $tf_output | jq -r '.internal_gw.value')
+export NET_ID=$(echo $tf_output | jq -r '.internal_net_id.value')
+export DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.vms_secgroup_name.value')
+export DEFAULT_KEY_NAME=$(echo $tf_output | jq -r '.vms_keypair_name.value')
+
+# jumbox lite
+export JUMPBOX_INTERNAL_IP=$(echo $tf_output | jq -r '.jumpbox_internal_ip.value')
+export JUMPBOX_EXTERNAL_IP=$(echo $tf_output | jq -r '.jumpbox_fip.value')
+export JUMPBOX_DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.jumpbox_secgroup_name.value')
+export JUMPBOX_DEFAULT_KEY_NAME=$(echo $tf_output | jq -r '.jumpbox_keypair_name.value')
 
 # BOSH
-export BOSH_INTERNAL_IP=$(jq -r '.outputs.bosh_internal_ip.value' ${TFSTATE})
-export BOSH_DEFAULT_SECURITY_GROUPS=$(jq -cr '.outputs.vms_security_group.value' ${TFSTATE})
+export BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')
+popd
