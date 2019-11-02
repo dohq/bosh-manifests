@@ -2,8 +2,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# source common env
-source ./bosh-env.sh
+# get tf_output
+pushd terraform/
+tf_output=$(terraform output -json)
+INTERNAL_CIDR=$(echo $tf_output | jq -r '.internal_cidr.value')
+INTERNAL_GW=$(echo $tf_output | jq -r '.internal_gw.value')
+NET_ID=$(echo $tf_output | jq -r '.internal_net_id.value')
+popd
 
 # export BOSH_LOG_LEVEL=debug
 bosh update-cloud-config bosh-deployment/openstack/cloud-config.yml \

@@ -1,16 +1,23 @@
 - type: replace
   path: /vm_types/-
   value:
-    name: tiny
+    name: nano
     cloud_properties:
-      instance_type: m1.tiny
+      instance_type: m1.nano
 
 - type: replace
   path: /vm_types/-
   value:
-    name: nano
+    name: micro
     cloud_properties:
-      instance_type: m1.nano
+      instance_type: m1.micro
+
+- type: replace
+  path: /vm_types/-
+  value:
+    name: small
+    cloud_properties:
+      instance_type: m1.small
 
 - type: replace
   path: /vm_types/-
@@ -19,13 +26,6 @@
     cloud_properties:
       instance_type: m1.medium
 
-- type: replace
-  path: /vm_types/-
-  value:
-    name: xlarge
-    cloud_properties:
-      instance_type: m1.xlarge
-
 # replace default large vm_types
 - type: replace
   path: /vm_types/name=large
@@ -33,3 +33,11 @@
     name: large
     cloud_properties:
       instance_type: m1.large
+
+- type: replace
+  path: /vm_types/-
+  value:
+    name: xlarge
+    cloud_properties:
+      instance_type: m1.xlarge
+
