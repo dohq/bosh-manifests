@@ -9,7 +9,7 @@ resource "openstack_compute_flavor_v2" "nano" {
   is_public = true
   vcpus     = 1
   ram       = 512
-  disk      = 1
+  disk      = 5
 }
 
 resource "openstack_compute_flavor_v2" "micro" {
@@ -17,7 +17,7 @@ resource "openstack_compute_flavor_v2" "micro" {
   is_public = true
   vcpus     = 1
   ram       = 1024
-  disk      = 1
+  disk      = 10
 }
 
 resource "openstack_compute_flavor_v2" "small" {
