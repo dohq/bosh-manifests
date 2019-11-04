@@ -15,7 +15,7 @@ echo "Check alrady heavy stemcell file"
 
 if [[ ! -f stemcells/$heavy_stemcell ]]; then
   echo "start $heavy_stemcell Download"
-  curl -fsSL -O $url -o stemcells/$heavy_stemcell
+  curl -fsL -o stemcells/$heavy_stemcell $url
   echo "Finished $heavy_stemcell Download"
 fi
 
