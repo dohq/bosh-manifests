@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# get tf_output
-pushd terraform/
-tf_output=$(terraform output -json)
-INTERNAL_CIDR=$(echo $tf_output | jq -r '.internal_cidr.value')
-INTERNAL_GW=$(echo $tf_output | jq -r '.internal_gw.value')
-BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')
-NET_ID=$(echo $tf_output | jq -r '.internal_net_id.value')
-DEFAULT_KEY_NAME=$(echo $tf_output | jq -r '.vms_keypair_name.value')
-DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.vms_secgroup_name.value')
-popd
+# get env
+source bosh-env.sh
 
 # export BOSH_LOG_LEVEL=debug
 # bosh int bosh-deployment/bosh.yml \
