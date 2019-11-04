@@ -25,7 +25,7 @@ bosh repack-stemcell --version $ver \
 --empty-image \
 --format openstack-light \
 --cloud-properties="{\"image_id\": \"$stemcell_id\"}" \
-stemcells/$heavy_stamcell stemcells/$light_stamcell
+stemcells/$heavy_stemcell stemcells/$light_stamcell
 echo "Finished create light stemcell"
 
 # upload bosh
