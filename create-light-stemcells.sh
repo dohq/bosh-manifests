@@ -13,7 +13,7 @@ stemcell_id="$(bosh int bosh-state.json --path=/current_stemcell_id)"
 # Download new stemcells
 echo "Check alrady heavy stemcell file"
 
-if [[ ! -f stemcells/$heavy_stemcell ]]; then
+if [[ ! -e stemcells/$heavy_stemcell ]]; then
   echo "start $heavy_stemcell Download"
   curl -fsL -o stemcells/$heavy_stemcell $url
   echo "Finished $heavy_stemcell Download"
