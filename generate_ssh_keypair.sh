@@ -10,7 +10,7 @@ red() {
 }
 
 # abort if a key pair already exists
-[[ -e "bosh.pem"     ]] && red "Found key. Aborting!" && exit 1
+[[ -e "bosh.pem" ]] && red "Found key. Aborting!" && exit 1
 [[ -e "bosh.pub" ]] && red "Found key. Aborting!" && exit 1
 
 # create new key pair
