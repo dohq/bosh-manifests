@@ -2,9 +2,9 @@
   path: /releases/-
   value:
     name: "uaa"
-    version: "73.7.0"
-    url: "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=73.7.0"
-    sha1: "86d544dc3e1eaa46d5a44530c609723888a51ffa"
+    version: "74.6.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=74.6.0"
+    sha1: "12bc6463446a9fd88b9ae098ffe87f4a27084f1e"
 
 - type: replace
   path: /instance_groups/name=concourse/jobs/-
