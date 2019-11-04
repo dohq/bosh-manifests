@@ -16,8 +16,4 @@ export JUMPBOX_DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.jumpbox_secgr
 
 # BOSH
 export BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')
-export BOSH_CLIENT=admin
-export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
-export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
-export BOSH_CA_CERT=bosh.pem
 popd
