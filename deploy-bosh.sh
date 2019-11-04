@@ -13,7 +13,7 @@ bosh delete-env bosh-deployment/bosh.yml \
   -o bosh-deployment/uaa.yml \
   -o bosh-deployment/credhub.yml \
   -o bosh-deployment/misc/cpi-resize-disk.yml \
-  -o ops-files/lite-instance-size.yml \
+  -o ops-files/bosh-instance-size.yml \
   -v director_name=bosh \
   -v az=nova \
   -v net_id=${NET_ID} \
