@@ -22,10 +22,6 @@ output "jumpbox_fip" {
   value = "${openstack_networking_floatingip_v2.jumpbox.address}"
 }
 
-output "jumpbox_keypair_name" {
-  value = "${openstack_compute_keypair_v2.jumpbox.name}"
-}
-
 output "jumpbox_secgroup_name" {
   value = "${openstack_networking_secgroup_v2.jumpbox.name}"
 }
@@ -40,4 +36,9 @@ output "vms_keypair_name" {
 
 output "vms_secgroup_name" {
   value = "${openstack_networking_secgroup_v2.vms.name}"
+}
+
+# aws
+output "bosh_creds_bucket" {
+  value = "${aws_s3_bucket.bosh-creds.bucket}"
 }

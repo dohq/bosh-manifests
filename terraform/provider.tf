@@ -1,12 +1,6 @@
 provider "openstack" {}
 
-provider "environment" {}
-
-data "environment_variable" "HOME" {
-  name                = "HOME"
-  fail_if_empty       = true
-  normalize_file_path = true
-}
+provider "aws" {}
 
 terraform {
   required_version = ">=0.11.0"

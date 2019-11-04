@@ -1,4 +1,5 @@
 pushd terraform/
+terraform init
 tf_output=$(terraform output -json)
 
 # common
@@ -12,7 +13,6 @@ export DEFAULT_KEY_NAME=$(echo $tf_output | jq -r '.vms_keypair_name.value')
 export JUMPBOX_INTERNAL_IP=$(echo $tf_output | jq -r '.jumpbox_internal_ip.value')
 export JUMPBOX_EXTERNAL_IP=$(echo $tf_output | jq -r '.jumpbox_fip.value')
 export JUMPBOX_DEFAULT_SECURITY_GROUPS=$(echo $tf_output | jq -r '.jumpbox_secgroup_name.value')
-export JUMPBOX_DEFAULT_KEY_NAME=$(echo $tf_output | jq -r '.jumpbox_keypair_name.value')
 
 # BOSH
 export BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')

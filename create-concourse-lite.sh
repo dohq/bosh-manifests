@@ -34,7 +34,7 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -v openstack_domain=${OS_USER_DOMAIN_NAME} \
   -v openstack_project=${OS_PROJECT_NAME} \
   -v region=${OS_REGION_NAME} \
-  -v default_key_name=${JUMPBOX_DEFAULT_KEY_NAME} \
+  -v default_key_name=${DEFAULT_KEY_NAME} \
   -v default_security_groups=[${DEFAULT_SECURITY_GROUPS}] \
   -v external_host=${JUMPBOX_EXTERNAL_IP} \
   -v github_client.username=${GITHUB_CLIENT} \
@@ -43,7 +43,7 @@ bosh create-env concourse-bosh-deployment/lite/concourse.yml \
   -v main_team.github_orgs=main \
   -v main_team.github_teams=main \
   -v credhub_client_id=atc_to_credhub \
-  --var-file private_key=$HOME/.ssh/id_rsa \
+  --var-file private_key=bosh.pem \
   --vars-store concourse-creds.yml \
   --state concourse-state.json $@
 
