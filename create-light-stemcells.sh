@@ -29,4 +29,4 @@ stemcells/$heavy_stemcell stemcells/$light_stemcell
 echo "Finished create light stemcell"
 
 # upload bosh
-bosh upload-stemcell stemcells/$light_stamcell
+bosh upload-stemcell stemcells/$light_stemcell
