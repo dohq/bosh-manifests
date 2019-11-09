@@ -34,16 +34,13 @@ output "vms_secgroup_name" {
   value = "${openstack_networking_secgroup_v2.vms.name}"
 }
 
-
 output "amp_boot_network_id" {
   value = "${openstack_networking_network_v2.lb-mgmt-net.id}"
 }
 
-
 output "amp_secgroup_id" {
   value = "${openstack_networking_secgroup_v2.lb-mgmt-sec-grp.id}"
 }
-
 
 output "amp_flavor_id" {
   value = "${openstack_compute_flavor_v2.amphora.id}"

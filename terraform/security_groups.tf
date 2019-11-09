@@ -43,16 +43,7 @@ resource "openstack_networking_secgroup_rule_v2" "lb-mgmt-sec-grp-egress" {
   remote_ip_prefix = "0.0.0.0/0"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "lb-mgmt-sec-grp-icmp" {
-  security_group_id = "${openstack_networking_secgroup_v2.lb-mgmt-sec-grp.id}"
-
-  direction        = "ingress"
-  ethertype        = "IPv4"
-  protocol         = "icmp"
-  remote_ip_prefix = "0.0.0.0/0"
-}
-
-resource "openstack_networking_secgroup_rule_v2" "lb-mgmt-sec-grp-ssh" {
+resource "openstack_networking_secgroup_rule_v2" "lb-mgmt-sec-grp-22" {
   security_group_id = "${openstack_networking_secgroup_v2.lb-mgmt-sec-grp.id}"
 
   direction        = "ingress"
