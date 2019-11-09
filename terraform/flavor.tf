@@ -4,6 +4,14 @@
 # --ram 8192 --disk 80 --vcpus 4 m1.large
 # --ram 16384 --disk 160 --vcpus 8 m1.xlarge
 
+resource "openstack_compute_flavor_v2" "amphora" {
+  name      = "amphora"
+  is_public = true
+  vcpus     = 1
+  ram       = 512
+  disk      = 5
+}
+
 resource "openstack_compute_flavor_v2" "nano" {
   name      = "m1.nano"
   is_public = true

@@ -53,3 +53,29 @@ resource "openstack_networking_subnet_v2" "internal-subnet" {
     "192.168.1.254",
   ]
 }
+
+resource "openstack_networking_network_v2" "lb-mgmt-net" {
+  name = "lb-mgmt-net"
+
+  shared         = true
+  external       = true
+  admin_state_up = true
+
+  segments {
+    network_type = "vxlan"
+  }
+}
+
+resource "openstack_networking_subnet_v2" "lb-mgmt-net-subnet" {
+  name = "lb-mgmt-net-subnet"
+
+  network_id = "${openstack_networking_network_v2.lb-mgmt-net.id}"
+  ip_version = 4
+  cidr       = "172.32.0.0/12"
+  gateway_ip = "172.32.0.1"
+
+  allocation_pool {
+    start = "172.32.0.100"
+    end   = "172.32.31.254"
+  }
+}
