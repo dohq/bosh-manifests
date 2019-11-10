@@ -1,0 +1,305 @@
+---
+anchors:
+  openstack_env: &openstack_env
+    OS_PROJECT_DOMAIN_NAME: ((os_project_domain_name))
+    OS_USER_DOMAIN_NAME: ((os_user_domain_name))
+    OS_PROJECT_NAME: ((os_project_name))
+    OS_TENANT_NAME: ((os_tenant_name))
+    OS_USERNAME: ((os_username))
+    OS_PASSWORD: ((os_password))
+    OS_AUTH_URL: ((os_auth_url))
+    OS_INTERFACE: ((os_interface))
+    OS_IDENTITY_API_VERSION: ((os_identity_api_version))
+    OS_REGION_NAME: ((os_region_name))
+    OS_AUTH_PLUGIN: ((os_auth_plugin))
+  bosh_env_image: &bosh_env_image
+    platform: linux
+    image_resource:
+      type: registry-image
+      source:
+        repository: dohq/bosh-env
+        tag: 6.1.1
+  s3_secret: &s3_secret
+    access_key_id: ((aws_access_key))
+    secret_access_key: ((aws_secret_key))
+    region_name: ((aws_region))
+  slack_notify: &slack_notify
+    on_success:
+      put: notify
+      params:
+        alert_type: success
+    on_failure:
+      put: notify
+      params:
+        alert_type: failed
+
+
+resource_types:
+- name: slack-alert
+  type: docker-image
+  source:
+    repository: arbourd/concourse-slack-alert-resource
+
+resources:
+- name: notify
+  type: slack-alert
+  icon: slack
+  source:
+    url: ((slack_webhook))
+- name: template
+  type: git
+  icon: github-face
+  source:
+    uri: https://github.com/dohq/bosh-manifests
+    branch: master
+- name: bosh-deployment
+  type: git
+  icon: github-face
+  source:
+    uri: https://github.com/cloudfoundry/bosh-deployment
+    branch: master
+    commit_filter:
+      include:
+      - "Bumping bosh to*"
+- name: bosh-creds
+  type: s3
+  icon: numeric-3-box
+  source:
+    <<: *s3_secret
+    bucket: ((bosh_creds_bucket))
+    versioned_file: bosh-creds.yml
+    initial_version: 0.0.0
+- name: bosh-state
+  type: s3
+  icon: numeric-3-box
+  source:
+    <<: *s3_secret
+    bucket: ((bosh_creds_bucket))
+    versioned_file: bosh-state.json
+    initial_version: 0.0.0
+    initial_content_text: "{}"
+
+jobs:
+- name: deploy-bosh
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bosh-deployment
+      trigger: true
+    - get: template
+    - get: bosh-creds
+    - get: bosh-state
+  - put: notify
+    params:
+      alert_type: start
+  - task: deploy-bosh
+    config:
+      <<: *bosh_env_image
+      params:
+        <<: *openstack_env
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_PEM: ((bosh_pem.private_key))
+      inputs:
+      - name: template
+      - name: bosh-creds
+      - name: bosh-state
+      outputs:
+      - name: out
+      caches:
+      - path: bosh
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          rm -rf ~/.bosh
+          ln -s $PWD/bosh $HOME/.bosh
+
+          cp bosh-creds/bosh-creds.yml template/
+          cp bosh-state/bosh-state.json template/
+
+          cd template
+          echo "$BOSH_PEM" > bosh.pem
+          chmod 600 bosh.pem
+
+          ./deploy-bosh.sh
+          ret=$?
+
+          cp bosh-creds.yml ../out/
+          cp bosh-state.json ../out/
+
+          if [[ $ret -ne 0 ]];then
+            exit 1
+          fi
+    ensure:
+      in_parallel:
+      - put: bosh-state
+        params:
+          file: out/bosh-state.json
+      - put: bosh-creds
+        params:
+          file: out/bosh-creds.yml
+  <<: *slack_notify
+
+- name: upload-stemcell
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bosh-deployment
+      passed:
+      - deploy-bosh
+      trigger: true
+    - get: template
+    - get: bosh-creds
+    - get: bosh-state
+  - put: notify
+    params:
+      alert_type: start
+  - task: upload-stemcell
+    config:
+      <<: *bosh_env_image
+      params:
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_NON_INTERACTIVE: yes
+      inputs:
+      - name: template
+      - name: bosh-creds
+      - name: bosh-state
+      caches:
+      - path: stemcells
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          ln -s $PWD/stemcells $PWD/template/stemcells
+
+          cp bosh-creds/bosh-creds.yml template/
+          cp bosh-state/bosh-state.json template/
+
+          cd template
+          source bosh-env.sh
+          export BOSH_CLIENT=admin
+          export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
+          export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
+          export BOSH_CA_CERT=bosh.pem
+          bosh int bosh-creds.yml --path=/director_ssl/ca > bosh.pem
+          chmod 600 bosh.pem
+
+          bosh env
+          ./create-light-stemcells.sh
+  <<: *slack_notify
+
+- name: update-cloudconfig
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bosh-deployment
+      passed:
+      - upload-stemcell
+      trigger: true
+    - get: template
+    - get: bosh-creds
+  - put: notify
+    params:
+      alert_type: start
+  - task: update-cloudconfig
+    config:
+      <<: *bosh_env_image
+      params:
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_NON_INTERACTIVE: yes
+      inputs:
+      - name: template
+      - name: bosh-creds
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          cp bosh-creds/bosh-creds.yml template/
+
+          cd template
+          source bosh-env.sh
+          export BOSH_CLIENT=admin
+          export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
+          export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
+          export BOSH_CA_CERT=bosh.pem
+          bosh int bosh-creds.yml --path=/director_ssl/ca > bosh.pem
+          chmod 600 bosh.pem
+
+          bosh env
+          ./update-cloud-config.sh
+  <<: *slack_notify
+
+- name: destroy-bosh
+  serial: true
+  plan:
+  - in_parallel:
+    - get: template
+    - get: bosh-creds
+    - get: bosh-state
+  - put: notify
+    params:
+      alert_type: start
+  - task: destroy-bosh
+    config:
+      <<: *bosh_env_image
+      params:
+        <<: *openstack_env
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_PEM: ((bosh_pem.private_key))
+      inputs:
+      - name: template
+      - name: bosh-creds
+      - name: bosh-state
+      outputs:
+      - name: out
+      caches:
+      - path: bosh
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          rm -rf ~/.bosh
+          ln -s $PWD/bosh $HOME/.bosh
+
+          cp bosh-creds/bosh-creds.yml template/
+          cp bosh-state/bosh-state.json template/
+
+          cd template
+          echo "$BOSH_PEM" > bosh.pem
+          chmod 600 bosh.pem
+
+          sed -e 's/create-env/delete-env/g' deploy-bosh.sh > destroy-bosh.sh
+          chmod +x destroy-bosh.sh
+
+          ./destroy-bosh.sh
+          ret=$?
+
+          echo '{}' > bosh-state.json
+
+          cp bosh-creds.yml ../out/
+          cp bosh-state.json ../out/
+
+          if [[ $ret -ne 0 ]];then
+            exit 1
+          fi
+    ensure:
+      in_parallel:
+      - put: bosh-state
+        params:
+          file: out/bosh-state.json
+      - put: bosh-creds
+        params:
+          file: out/bosh-creds.yml
+  <<: *slack_notify
