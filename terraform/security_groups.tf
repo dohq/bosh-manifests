@@ -17,7 +17,7 @@ resource "openstack_networking_secgroup_rule_v2" "vms-ingress" {
 
   direction        = "ingress"
   ethertype        = "IPv4"
-  remote_ip_prefix = "192.168.1.0/24"
+  remote_ip_prefix = "0.0.0.0/0"
 }
 
 resource "openstack_networking_secgroup_rule_v2" "vms-same-ingress" {
