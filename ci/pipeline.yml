@@ -12,7 +12,7 @@ anchors:
     OS_IDENTITY_API_VERSION: ((os_identity_api_version))
     OS_REGION_NAME: ((os_region_name))
     OS_AUTH_PLUGIN: ((os_auth_plugin))
-  bosh_env_image: &bosh_env_image
+  docker_bosh_env: &docker_bosh_env
     platform: linux
     image_resource:
       type: registry-image
@@ -52,6 +52,14 @@ resources:
   source:
     uri: https://github.com/dohq/bosh-manifests
     branch: master
+- name: template-tf
+  type: git
+  icon: terraform
+  source:
+    uri: https://github.com/dohq/bosh-manifests
+    branch: master
+    paths:
+    - "terraform/*.tf"
 - name: bosh-deployment
   type: git
   icon: github-face
@@ -79,7 +87,81 @@ resources:
     initial_version: 0.0.0
     initial_content_text: "{}"
 
+groups:
+- name: build
+  jobs:
+  - terraform-plan
+  - terraform-apply
+  - deploy-bosh
+  - upload-stemcell
+  - update-cloudconfig
+- name: cleanup
+  jobs:
+  - destroy-bosh
+
+
 jobs:
+- name: terraform-plan
+  serial: true
+  plan:
+  - get: template-tf
+    trigger: true
+  - put: notify
+    params:
+      alert_type: start
+  - task: terraform-plan
+    config:
+      <<: *docker_bosh_env
+      params:
+        <<: *openstack_env
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+      inputs:
+      - name: template-tf
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo
+
+          cd template/terraform
+          terraform init
+          terraform plan
+  <<: *slack_notify
+- name: terraform-apply
+  serial: true
+  plan:
+  - get: template-tf
+    passed:
+    - terraform-plan
+  - put: notify
+    params:
+      alert_type: start
+  - task: terraform-apply
+    config:
+      <<: *docker_bosh_env
+      params:
+        <<: *openstack_env
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+      inputs:
+      - name: template-tf
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo
+
+          cd template/terraform
+          terraform init
+          terraform plan -out plan
+          terraform apply plan
+  <<: *slack_notify
+
 - name: deploy-bosh
   serial: true
   plan:
@@ -94,7 +176,7 @@ jobs:
       alert_type: start
   - task: deploy-bosh
     config:
-      <<: *bosh_env_image
+      <<: *docker_bosh_env
       params:
         <<: *openstack_env
         AWS_ACCESS_KEY: ((aws_access_key))
@@ -114,6 +196,8 @@ jobs:
         args:
         - -c
         - |
+          set -euo
+
           rm -rf ~/.bosh
           ln -s $PWD/bosh $HOME/.bosh
 
@@ -159,7 +243,7 @@ jobs:
       alert_type: start
   - task: upload-stemcell
     config:
-      <<: *bosh_env_image
+      <<: *docker_bosh_env
       params:
         AWS_ACCESS_KEY: ((aws_access_key))
         AWS_SECRET_KEY: ((aws_secret_key))
@@ -176,6 +260,8 @@ jobs:
         args:
         - -c
         - |
+          set -euo
+
           ln -s $PWD/stemcells $PWD/template/stemcells
 
           cp bosh-creds/bosh-creds.yml template/
@@ -209,7 +295,7 @@ jobs:
       alert_type: start
   - task: update-cloudconfig
     config:
-      <<: *bosh_env_image
+      <<: *docker_bosh_env
       params:
         AWS_ACCESS_KEY: ((aws_access_key))
         AWS_SECRET_KEY: ((aws_secret_key))
@@ -223,6 +309,8 @@ jobs:
         args:
         - -c
         - |
+          set -euo
+
           cp bosh-creds/bosh-creds.yml template/
 
           cd template
@@ -250,7 +338,7 @@ jobs:
       alert_type: start
   - task: destroy-bosh
     config:
-      <<: *bosh_env_image
+      <<: *docker_bosh_env
       params:
         <<: *openstack_env
         AWS_ACCESS_KEY: ((aws_access_key))
@@ -270,6 +358,8 @@ jobs:
         args:
         - -c
         - |
+          set -euo
+
           rm -rf ~/.bosh
           ln -s $PWD/bosh $HOME/.bosh
 
