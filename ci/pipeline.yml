@@ -104,15 +104,13 @@ jobs:
     params:
       alert_type: start
   - task: deploy-bosh
-    config:
-      params:
-        <<: *openstack_env
-        AWS_ACCESS_KEY: ((aws_access_key))
-        AWS_SECRET_KEY: ((aws_secret_key))
-        AWS_REGION: ((aws_region))
-        BOSH_PEM: ((bosh_pem.private_key))
-      run:
-        path: template/ci/tasks/deploy-bosh.yml
+    file: template/ci/tasks/deploy-bosh.yml
+    params:
+      <<: *openstack_env
+      AWS_ACCESS_KEY: ((aws_access_key))
+      AWS_SECRET_KEY: ((aws_secret_key))
+      AWS_REGION: ((aws_region))
+      BOSH_PEM: ((bosh_pem.private_key))
     ensure:
       in_parallel:
       - put: bosh-state
