@@ -124,9 +124,9 @@ jobs:
         args:
         - -c
         - |
-          set -euo
+          set -eu
 
-          cd template/terraform
+          cd template-tf/terraform
           terraform init
           terraform plan
   <<: *slack_notify
@@ -154,9 +154,9 @@ jobs:
         args:
         - -c
         - |
-          set -euo
+          set -eu
 
-          cd template/terraform
+          cd template-tf/terraform
           terraform init
           terraform plan -out plan
           terraform apply plan
@@ -196,7 +196,7 @@ jobs:
         args:
         - -c
         - |
-          set -euo
+          set -eu
 
           rm -rf ~/.bosh
           ln -s $PWD/bosh $HOME/.bosh
@@ -260,7 +260,7 @@ jobs:
         args:
         - -c
         - |
-          set -euo
+          set -eu
 
           ln -s $PWD/stemcells $PWD/template/stemcells
 
@@ -309,7 +309,7 @@ jobs:
         args:
         - -c
         - |
-          set -euo
+          set -eu
 
           cp bosh-creds/bosh-creds.yml template/
 
@@ -358,7 +358,7 @@ jobs:
         args:
         - -c
         - |
-          set -euo
+          set -eu
 
           rm -rf ~/.bosh
           ln -s $PWD/bosh $HOME/.bosh
