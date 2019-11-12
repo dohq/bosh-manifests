@@ -128,7 +128,7 @@ jobs:
     - get: bosh-deployment
       passed:
       - deploy-bosh
-      # trigger: true
+      trigger: true
     - get: template
     - get: bosh-creds
     - get: bosh-state
@@ -136,42 +136,12 @@ jobs:
     params:
       alert_type: start
   - task: upload-stemcell
-    config:
-      <<: *docker_bosh_env
-      params:
-        AWS_ACCESS_KEY: ((aws_access_key))
-        AWS_SECRET_KEY: ((aws_secret_key))
-        AWS_REGION: ((aws_region))
-        BOSH_NON_INTERACTIVE: yes
-      inputs:
-      - name: template
-      - name: bosh-creds
-      - name: bosh-state
-      caches:
-      - path: stemcells
-      run:
-        path: bash
-        args:
-        - -c
-        - |
-          set -eu
-
-          ln -s $PWD/stemcells $PWD/template/stemcells
-
-          cp bosh-creds/bosh-creds.yml template/
-          cp bosh-state/bosh-state.json template/
-
-          cd template
-          source bosh-env.sh
-          export BOSH_CLIENT=admin
-          export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
-          export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
-          export BOSH_CA_CERT=bosh.pem
-          bosh int bosh-creds.yml --path=/director_ssl/ca > bosh.pem
-          chmod 600 bosh.pem
-
-          bosh env
-          ./create-light-stemcells.sh
+    file: template/ci/tasks/upload-stemcell.yml
+    params:
+      AWS_ACCESS_KEY: ((aws_access_key))
+      AWS_SECRET_KEY: ((aws_secret_key))
+      AWS_REGION: ((aws_region))
+      BOSH_NON_INTERACTIVE: yes
   <<: *slack_notify
 
 - name: update-cloudconfig
