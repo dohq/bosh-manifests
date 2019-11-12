@@ -158,7 +158,7 @@ jobs:
     params:
       alert_type: start
   - task: update-cloud-config
-    file: template/ci/task/update-cloud-config.yml
+    file: template/ci/tasks/update-cloud-config.yml
     params:
       AWS_ACCESS_KEY: ((aws_access_key))
       AWS_SECRET_KEY: ((aws_secret_key))
