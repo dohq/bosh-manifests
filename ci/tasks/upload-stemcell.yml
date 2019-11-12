@@ -16,5 +16,9 @@ inputs:
 - name: template
 - name: bosh-creds
 - name: bosh-state
+
 caches:
 - path: stemcells
+
+run:
+  path: template/ci/scripts/upload-stemcell.sh
