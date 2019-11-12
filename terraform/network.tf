@@ -6,8 +6,8 @@ resource "openstack_networking_network_v2" "external" {
   external = true
 
   segments {
-    network_type     = "${var.network-type}"
-    physical_network = "${var.physical-network}"
+    network_type     = "${var.network_type}"
+    physical_network = "${var.physical_network}"
   }
 }
 
@@ -16,17 +16,17 @@ resource "openstack_networking_subnet_v2" "external-subnet" {
 
   network_id = "${openstack_networking_network_v2.external.id}"
   ip_version = 4
-  cidr       = "192.168.1.0/24"
-  gateway_ip = "192.168.1.1"
+  cidr       = "${var.external_subnet_cidr}"
+  gateway_ip = "${var.external_subnet_gateway}"
 
   dns_nameservers = [
-    "192.168.1.254",
+    "${var.external_subnet_dns}",
     "1.1.1.1"
   ]
 
   allocation_pool {
-    start = "192.168.1.25"
-    end   = "192.168.1.99"
+    start = "${var.external_subnet_allocation_start}"
+    end   = "${var.external_subnet_allocation_end}"
   }
 }
 
@@ -46,11 +46,11 @@ resource "openstack_networking_subnet_v2" "internal-subnet" {
 
   network_id = "${openstack_networking_network_v2.internal.id}"
   ip_version = 4
-  cidr       = "10.0.0.0/24"
-  gateway_ip = "10.0.0.1"
+  cidr       = "${var.internal_subnet_cidr}"
+  gateway_ip = "${var.internal_subnet_gateway}"
 
   dns_nameservers = [
-    "192.168.1.254",
+    "${var.external_subnet_dns}",
   ]
 }
 
@@ -71,11 +71,11 @@ resource "openstack_networking_subnet_v2" "lb-mgmt-net-subnet" {
 
   network_id = "${openstack_networking_network_v2.lb-mgmt-net.id}"
   ip_version = 4
-  cidr       = "172.32.0.0/12"
-  gateway_ip = "172.32.0.1"
+  cidr       = "${var.lb_mgmt_subnet_cidr}"
+  gateway_ip = "${var.lb_mgmt_subnet_gateway}"
 
   allocation_pool {
-    start = "172.32.0.100"
-    end   = "172.32.31.254"
+    start = "${var.lb_mgmt_subnet_allocation_start}"
+    end   = "${var.lb_mgmt_subnet_allocation_end}"
   }
 }
