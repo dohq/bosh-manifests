@@ -52,14 +52,6 @@ resources:
   source:
     uri: https://github.com/dohq/bosh-manifests
     branch: master
-- name: template-tf
-  type: git
-  icon: terraform
-  source:
-    uri: https://github.com/dohq/bosh-manifests
-    branch: master
-    paths:
-    - "terraform/*.tf"
 - name: bosh-deployment
   type: git
   icon: github-face
@@ -90,8 +82,6 @@ resources:
 groups:
 - name: build
   jobs:
-  - terraform-plan
-  - terraform-apply
   - deploy-bosh
   - upload-stemcell
   - update-cloudconfig
@@ -101,67 +91,6 @@ groups:
 
 
 jobs:
-- name: terraform-plan
-  serial: true
-  plan:
-  - get: template-tf
-    trigger: true
-  - put: notify
-    params:
-      alert_type: start
-  - task: terraform-plan
-    config:
-      <<: *docker_bosh_env
-      params:
-        <<: *openstack_env
-        AWS_ACCESS_KEY: ((aws_access_key))
-        AWS_SECRET_KEY: ((aws_secret_key))
-        AWS_REGION: ((aws_region))
-      inputs:
-      - name: template-tf
-      run:
-        path: bash
-        args:
-        - -c
-        - |
-          set -eu
-
-          cd template-tf/terraform
-          terraform init
-          terraform plan
-  <<: *slack_notify
-- name: terraform-apply
-  serial: true
-  plan:
-  - get: template-tf
-    passed:
-    - terraform-plan
-  - put: notify
-    params:
-      alert_type: start
-  - task: terraform-apply
-    config:
-      <<: *docker_bosh_env
-      params:
-        <<: *openstack_env
-        AWS_ACCESS_KEY: ((aws_access_key))
-        AWS_SECRET_KEY: ((aws_secret_key))
-        AWS_REGION: ((aws_region))
-      inputs:
-      - name: template-tf
-      run:
-        path: bash
-        args:
-        - -c
-        - |
-          set -eu
-
-          cd template-tf/terraform
-          terraform init
-          terraform plan -out plan
-          terraform apply plan
-  <<: *slack_notify
-
 - name: deploy-bosh
   serial: true
   plan:
