@@ -1,0 +1,38 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: dohq/bosh-env
+    tag: 6.1.1
+
+params:
+  OS_PROJECT_DOMAIN_NAME:
+  OS_USER_DOMAIN_NAME:
+  OS_PROJECT_NAME:
+  OS_TENANT_NAME:
+  OS_USERNAME:
+  OS_PASSWORD:
+  OS_AUTH_URL:
+  OS_INTERFACE:
+  OS_IDENTITY_API_VERSION:
+  OS_REGION_NAME:
+  OS_AUTH_PLUGIN:
+  AWS_ACCESS_KEY:
+  AWS_SECRET_KEY:
+  AWS_REGION:
+  BOSH_PEM:
+
+inputs:
+- name: template
+- name: bosh-creds
+- name: bosh-state
+
+outputs:
+- name: out
+
+caches:
+- path: bosh
+
+run:
+  path: template/ci/scripts/destroy-bosh.sh

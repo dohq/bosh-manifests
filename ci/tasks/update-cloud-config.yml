@@ -1,0 +1,20 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: dohq/bosh-env
+    tag: 6.1.1
+
+params:
+  AWS_ACCESS_KEY:
+  AWS_SECRET_KEY:
+  AWS_REGION:
+  BOSH_NON_INTERACTIVE:
+
+inputs:
+- name: template
+- name: bosh-creds
+
+run:
+  path: template/ci/scripts/update-cloud-config.sh

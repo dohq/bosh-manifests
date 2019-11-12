@@ -84,7 +84,7 @@ groups:
   jobs:
   - deploy-bosh
   - upload-stemcell
-  - update-cloudconfig
+  - update-cloud-config
 - name: cleanup
   jobs:
   - destroy-bosh
@@ -144,7 +144,7 @@ jobs:
       BOSH_NON_INTERACTIVE: yes
   <<: *slack_notify
 
-- name: update-cloudconfig
+- name: update-cloud-config
   serial: true
   plan:
   - in_parallel:
@@ -157,37 +157,13 @@ jobs:
   - put: notify
     params:
       alert_type: start
-  - task: update-cloudconfig
-    config:
-      <<: *docker_bosh_env
-      params:
-        AWS_ACCESS_KEY: ((aws_access_key))
-        AWS_SECRET_KEY: ((aws_secret_key))
-        AWS_REGION: ((aws_region))
-        BOSH_NON_INTERACTIVE: yes
-      inputs:
-      - name: template
-      - name: bosh-creds
-      run:
-        path: bash
-        args:
-        - -c
-        - |
-          set -eu
-
-          cp bosh-creds/bosh-creds.yml template/
-
-          cd template
-          source bosh-env.sh
-          export BOSH_CLIENT=admin
-          export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
-          export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
-          export BOSH_CA_CERT=bosh.pem
-          bosh int bosh-creds.yml --path=/director_ssl/ca > bosh.pem
-          chmod 600 bosh.pem
-
-          bosh env
-          ./update-cloud-config.sh
+  - task: update-cloud-config
+    file: template/ci/task/update-cloud-config.yml
+    params:
+      AWS_ACCESS_KEY: ((aws_access_key))
+      AWS_SECRET_KEY: ((aws_secret_key))
+      AWS_REGION: ((aws_region))
+      BOSH_NON_INTERACTIVE: yes
   <<: *slack_notify
 
 - name: destroy-bosh
@@ -201,53 +177,13 @@ jobs:
     params:
       alert_type: start
   - task: destroy-bosh
-    config:
-      <<: *docker_bosh_env
-      params:
-        <<: *openstack_env
-        AWS_ACCESS_KEY: ((aws_access_key))
-        AWS_SECRET_KEY: ((aws_secret_key))
-        AWS_REGION: ((aws_region))
-        BOSH_PEM: ((bosh_pem.private_key))
-      inputs:
-      - name: template
-      - name: bosh-creds
-      - name: bosh-state
-      outputs:
-      - name: out
-      caches:
-      - path: bosh
-      run:
-        path: bash
-        args:
-        - -c
-        - |
-          set -eu
-
-          rm -rf ~/.bosh
-          ln -s $PWD/bosh $HOME/.bosh
-
-          cp bosh-creds/bosh-creds.yml template/
-          cp bosh-state/bosh-state.json template/
-
-          cd template
-          echo "$BOSH_PEM" > bosh.pem
-          chmod 600 bosh.pem
-
-          sed -e 's/create-env/delete-env/g' deploy-bosh.sh > destroy-bosh.sh
-          chmod +x destroy-bosh.sh
-
-          ./destroy-bosh.sh
-          ret=$?
-
-          echo '{}' > bosh-state.json
-
-          cp bosh-creds.yml ../out/
-          cp bosh-state.json ../out/
-
-          if [[ $ret -ne 0 ]];then
-            exit 1
-          fi
+    file: template/ci/task/destroy-bosh.yml
+    params:
+      <<: *openstack_env
+      AWS_ACCESS_KEY: ((aws_access_key))
+      AWS_SECRET_KEY: ((aws_secret_key))
+      AWS_REGION: ((aws_region))
+      BOSH_PEM: ((bosh_pem.private_key))
     ensure:
       in_parallel:
       - put: bosh-state
