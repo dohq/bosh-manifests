@@ -9,4 +9,6 @@ resource "aws_s3_bucket" "bosh-creds" {
   versioning {
     enabled = true
   }
+
+  force_destroy = true
 }
