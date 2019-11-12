@@ -50,3 +50,8 @@ output "amp_secgroup_id" {
 output "amp_flavor_id" {
   value = "${openstack_compute_flavor_v2.amphora.id}"
 }
+
+# deployment
+output "concourse_fip" {
+  value = "${openstack_networking_floatingip_v2.concourse_lb.address}"
+}

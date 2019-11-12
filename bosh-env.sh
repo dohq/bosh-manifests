@@ -15,4 +15,7 @@ export JUMPBOX_EXTERNAL_IP=$(echo $tf_output | jq -r '.jumpbox_fip.value')
 
 # BOSH
 export BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')
+
+# concourse
+export CONCOURSE_EXTERNAL_IP=$(echo $tf_output | jq -r '.concourse_fip.value')
 popd
