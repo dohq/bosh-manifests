@@ -105,47 +105,14 @@ jobs:
       alert_type: start
   - task: deploy-bosh
     config:
-      <<: *docker_bosh_env
       params:
         <<: *openstack_env
         AWS_ACCESS_KEY: ((aws_access_key))
         AWS_SECRET_KEY: ((aws_secret_key))
         AWS_REGION: ((aws_region))
         BOSH_PEM: ((bosh_pem.private_key))
-      inputs:
-      - name: template
-      - name: bosh-creds
-      - name: bosh-state
-      outputs:
-      - name: out
-      caches:
-      - path: bosh
       run:
-        path: bash
-        args:
-        - -c
-        - |
-          set -eu
-
-          rm -rf ~/.bosh
-          ln -s $PWD/bosh $HOME/.bosh
-
-          cp bosh-creds/bosh-creds.yml template/
-          cp bosh-state/bosh-state.json template/
-
-          cd template
-          echo "$BOSH_PEM" > bosh.pem
-          chmod 600 bosh.pem
-
-          ./deploy-bosh.sh
-          ret=$?
-
-          cp bosh-creds.yml ../out/
-          cp bosh-state.json ../out/
-
-          if [[ $ret -ne 0 ]];then
-            exit 1
-          fi
+        path: template/ci/tasks/deploy-bosh.yml
     ensure:
       in_parallel:
       - put: bosh-state
@@ -163,7 +130,7 @@ jobs:
     - get: bosh-deployment
       passed:
       - deploy-bosh
-      trigger: true
+      # trigger: true
     - get: template
     - get: bosh-creds
     - get: bosh-state
