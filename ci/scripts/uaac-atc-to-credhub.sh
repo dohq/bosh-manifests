@@ -2,15 +2,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-
-cp bosh-creds/bosh-creds.yml template/
-cd template
-source bosh-env.sh
-
-uaac target https://${BOSH_INTERNAL_IP}:8443
+uaac target https://${UAA_ADDRESS}:8443 \
+  --ca-cert <(bosh int bosh-creds/bosh-creds.yml --path=/uaa_ssl/ca)
 uaac token client get admin \
-  -s $(bosh int bosh-creds.yml --path=/uaa_admin_client_secret)
-  --ca-cert <(bosh int bosh-creds.yml --path=/uaa_ca/ca)
+  -s $(bosh int bosh-creds/bosh-creds.yml --path=/uaa_admin_client_secret)
 
 uaac client delete atc_to_credhub
 uaac client add atc_to_credhub \

@@ -78,6 +78,7 @@ groups:
   - deploy-bosh
   - upload-stemcell
   - update-cloud-config
+  - add-uaa-creds
 - name: cleanup
   jobs:
   - destroy-bosh
@@ -163,8 +164,8 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: template
     - get: bosh-creds
+    - get: template
   - put: notify
     params:
       alert_type: start
@@ -172,6 +173,7 @@ jobs:
     file: template/ci/tasks/uaac-atc-to-credhub.yml
     params:
       ATC_TO_CREDHUB_SECRET: ((atc_to_credhub_secret))
+      UAA_ADDRESS: ((uaa_address))
   <<: *slack_notify
 
 - name: destroy-bosh

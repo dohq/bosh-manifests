@@ -8,6 +8,7 @@ image_resource:
 
 params:
   ATC_TO_CREDHUB_SECRET:
+  UAA_ADDRESS:
 
 inputs:
 - name: bosh-creds
