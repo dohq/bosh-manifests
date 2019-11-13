@@ -53,5 +53,8 @@ output "amp_flavor_id" {
 
 # deployment
 output "concourse_fip" {
-  value = "${openstack_networking_floatingip_v2.concourse_lb.address}"
+  value = "${openstack_networking_floatingip_v2.concourse_lb_fip.address}"
+}
+output "concourse_lb_pool_name" {
+  value = "${openstack_lb_pool_v2.concourse_lb_pool.name}"
 }

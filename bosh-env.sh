@@ -18,4 +18,5 @@ export BOSH_INTERNAL_IP=$(echo $tf_output | jq -r '.bosh_internal_ip.value')
 
 # concourse
 export CONCOURSE_EXTERNAL_IP=$(echo $tf_output | jq -r '.concourse_fip.value')
+export CONCOURSE_LB_POOL_NAME=$(echo $tf_output | jq -r '.concourse_lb_pool_name.value')
 popd

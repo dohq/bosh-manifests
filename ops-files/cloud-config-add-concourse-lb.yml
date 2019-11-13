@@ -1,0 +1,8 @@
+- type: replace
+  path: /vm_extensions?
+  value:
+    name: concourse-lb
+    cloud_properties:
+      loadbalancer_pools:
+        name: ((concourse_lb_pool_name))
+        port: ((concourse_lb_pool_target_port))
