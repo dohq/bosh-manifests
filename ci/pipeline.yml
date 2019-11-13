@@ -12,13 +12,6 @@ anchors:
     OS_IDENTITY_API_VERSION: ((os_identity_api_version))
     OS_REGION_NAME: ((os_region_name))
     OS_AUTH_PLUGIN: ((os_auth_plugin))
-  docker_bosh_env: &docker_bosh_env
-    platform: linux
-    image_resource:
-      type: registry-image
-      source:
-        repository: dohq/bosh-env
-        tag: 6.1.1
   s3_secret: &s3_secret
     access_key_id: ((aws_access_key))
     secret_access_key: ((aws_secret_key))
@@ -164,6 +157,21 @@ jobs:
       AWS_SECRET_KEY: ((aws_secret_key))
       AWS_REGION: ((aws_region))
       BOSH_NON_INTERACTIVE: yes
+  <<: *slack_notify
+
+- name: add-uaa-creds
+  serial: true
+  plan:
+  - in_parallel:
+    - get: template
+    - get: bosh-creds
+  - put: notify
+    params:
+      alert_type: start
+  - task: atc-to-credhub
+    file: template/ci/tasks/uaac-atc-to-credhub.yml
+    params:
+      ATC_TO_CREDHUB_SECRET: ((atc_to_credhub_secret))
   <<: *slack_notify
 
 - name: destroy-bosh

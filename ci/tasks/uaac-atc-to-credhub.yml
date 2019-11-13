@@ -1,0 +1,17 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: dohq/cf-tools
+    tag: 6.1.1
+
+params:
+  ATC_TO_CREDHUB_SECRET:
+
+inputs:
+- name: bosh-creds
+- name: template
+
+run:
+  path: template/ci/scripts/uaac-atc-to-credhub.sh
