@@ -1,5 +1,5 @@
 - type: replace
-  path: /vm_extensions?
+  path: /vm_extensions?/-
   value:
     name: concourse-lb
     cloud_properties:
