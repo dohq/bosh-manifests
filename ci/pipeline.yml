@@ -16,6 +16,13 @@ anchors:
     access_key_id: ((aws_access_key))
     secret_access_key: ((aws_secret_key))
     region_name: ((aws_region))
+  docker_bosh_env: &docker_bosh_env
+    platform: linux
+    image_resource:
+      type: registry-image
+      source:
+        repository: dohq/bosh-env
+        tag: 6.1.1
   slack_notify: &slack_notify
     on_success:
       put: notify
@@ -98,13 +105,48 @@ jobs:
     params:
       alert_type: start
   - task: deploy-bosh
-    file: template/ci/tasks/deploy-bosh.yml
-    params:
-      <<: *openstack_env
-      AWS_ACCESS_KEY: ((aws_access_key))
-      AWS_SECRET_KEY: ((aws_secret_key))
-      AWS_REGION: ((aws_region))
-      BOSH_PEM: ((bosh_pem.private_key))
+    config:
+      <<: *docker_bosh_env
+      params:
+        <<: *openstack_env
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_PEM: ((bosh_pem.private_key))
+      inputs:
+      - name: template
+      - name: bosh-creds
+      - name: bosh-state
+      outputs:
+      - name: out
+      caches:
+      - path: bosh
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo pipefail
+
+          rm -rf ~/.bosh
+          ln -s $PWD/bosh $HOME/.bosh
+
+          cp bosh-creds/bosh-creds.yml template/
+          cp bosh-state/bosh-state.json template/
+
+          cd template
+          echo "$BOSH_PEM" > bosh.pem
+          chmod 600 bosh.pem
+
+          ./deploy-bosh.sh
+          ret=$?
+
+          cp bosh-creds.yml ../out/
+          cp bosh-state.json ../out/
+
+          if [[ $ret -ne 0 ]];then
+            exit 1
+          fi
     ensure:
       in_parallel:
       - put: bosh-state
@@ -130,12 +172,43 @@ jobs:
     params:
       alert_type: start
   - task: upload-stemcell
-    file: template/ci/tasks/upload-stemcell.yml
-    params:
-      AWS_ACCESS_KEY: ((aws_access_key))
-      AWS_SECRET_KEY: ((aws_secret_key))
-      AWS_REGION: ((aws_region))
-      BOSH_NON_INTERACTIVE: yes
+    config:
+      <<: *docker_bosh_env
+      params:
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_NON_INTERACTIVE: yes
+      inputs:
+      - name: template
+      - name: bosh-creds
+      - name: bosh-state
+      caches:
+      - path: stemcells
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo pipefail
+          IFS=$'\n\t'
+
+          ln -s $PWD/stemcells $PWD/template/stemcells
+
+          cp bosh-creds/bosh-creds.yml template/
+          cp bosh-state/bosh-state.json template/
+
+          cd template
+          source bosh-env.sh
+          export BOSH_CLIENT=admin
+          export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
+          export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
+          export BOSH_CA_CERT=bosh.pem
+          bosh int bosh-creds.yml --path=/director_ssl/ca > bosh.pem
+          chmod 600 bosh.pem
+
+          bosh env
+          ./create-light-stemcells.sh
   <<: *slack_notify
 
 - name: update-cloud-config
@@ -152,12 +225,37 @@ jobs:
     params:
       alert_type: start
   - task: update-cloud-config
-    file: template/ci/tasks/update-cloud-config.yml
-    params:
-      AWS_ACCESS_KEY: ((aws_access_key))
-      AWS_SECRET_KEY: ((aws_secret_key))
-      AWS_REGION: ((aws_region))
-      BOSH_NON_INTERACTIVE: yes
+    config:
+      <<: *docker_bosh_env
+      params:
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_NON_INTERACTIVE: yes
+      inputs:
+      - name: template
+      - name: bosh-creds
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo pipefail
+          IFS=$'\n\t'
+
+          cp bosh-creds/bosh-creds.yml template/
+
+          cd template
+          source bosh-env.sh
+          export BOSH_CLIENT=admin
+          export BOSH_CLIENT_SECRET=$(bosh int bosh-creds.yml --path=/admin_password)
+          export BOSH_ENVIRONMENT=$BOSH_INTERNAL_IP
+          export BOSH_CA_CERT=bosh.pem
+          bosh int bosh-creds.yml --path=/director_ssl/ca > bosh.pem
+          chmod 600 bosh.pem
+
+          bosh env
+          ./update-cloud-config.sh
   <<: *slack_notify
 
 - name: add-uaa-creds
@@ -170,10 +268,36 @@ jobs:
     params:
       alert_type: start
   - task: atc-to-credhub
-    file: template/ci/tasks/uaac-atc-to-credhub.yml
-    params:
-      ATC_TO_CREDHUB_SECRET: ((atc_to_credhub_secret))
-      UAA_ADDRESS: ((uaa_address))
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: dohq/cf-tools
+          tag: 6.1.1
+      params:
+        ATC_TO_CREDHUB_SECRET: ((atc_to_credhub_secret))
+        UAA_ADDRESS: ((uaa_address))
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo pipefail
+          IFS=$'\n\t'
+
+          uaac target https://${UAA_ADDRESS}:8443 \
+            --ca-cert <(bosh int bosh-creds/bosh-creds.yml --path=/uaa_ssl/ca)
+          uaac token client get admin \
+            -s $(bosh int bosh-creds/bosh-creds.yml --path=/uaa_admin_client_secret)
+
+          uaac client delete atc_to_credhub
+          uaac client add atc_to_credhub \
+            --name atc_to_credhub \
+            --secret ${ATC_TO_CREDHUB_SECRET} \
+            --authorized_grant_types client_credentials \
+            --authorities credhub.write,credhub.read \
+            --access_token_validity 3600
   <<: *slack_notify
 
 - name: destroy-bosh
@@ -187,13 +311,55 @@ jobs:
     params:
       alert_type: start
   - task: destroy-bosh
-    file: template/ci/task/destroy-bosh.yml
-    params:
-      <<: *openstack_env
-      AWS_ACCESS_KEY: ((aws_access_key))
-      AWS_SECRET_KEY: ((aws_secret_key))
-      AWS_REGION: ((aws_region))
-      BOSH_PEM: ((bosh_pem.private_key))
+    config:
+      <<: *docker_bosh_env
+      params:
+        <<: *openstack_env
+        AWS_ACCESS_KEY: ((aws_access_key))
+        AWS_SECRET_KEY: ((aws_secret_key))
+        AWS_REGION: ((aws_region))
+        BOSH_PEM: ((bosh_pem.private_key))
+      inputs:
+      - name: template
+      - name: bosh-creds
+      - name: bosh-state
+      outputs:
+      - name: out
+      caches:
+      - path: bosh
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -euo pipefail
+          IFS=$'\n\t'
+
+
+          rm -rf ~/.bosh
+          ln -s $PWD/bosh $HOME/.bosh
+
+          cp bosh-creds/bosh-creds.yml template/
+          cp bosh-state/bosh-state.json template/
+
+          cd template
+          echo "$BOSH_PEM" > bosh.pem
+          chmod 600 bosh.pem
+
+          sed -e 's/create-env/delete-env/g' deploy-bosh.sh > destroy-bosh.sh
+          chmod +x destroy-bosh.sh
+
+          ./destroy-bosh.sh
+          ret=$?
+
+          echo '{}' > bosh-state.json
+
+          cp bosh-creds.yml ../out/
+          cp bosh-state.json ../out/
+
+          if [[ $ret -ne 0 ]];then
+            exit 1
+          fi
     ensure:
       in_parallel:
       - put: bosh-state
