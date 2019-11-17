@@ -5,8 +5,8 @@ IFS=$'\n\t'
 
 # vars
 url=$(bosh int bosh-deployment/openstack/cpi.yml --path=/name=stemcell/value/url)
-ver="$(echo $url | cut -d "/" -f 5)"
-heavy_stemcell="$(echo $url | cut -d "/" -f 6)"
+ver="$(echo $url | cut -d "/" -f 4)"
+heavy_stemcell="$(echo $url | cut -d "/" -f 5)"
 light_stemcell="lite-bosh-stemcell-$ver-openstack-kvm-ubuntu-xenial-go_agent.tgz"
 stemcell_id="$(bosh int bosh-state.json --path=/stemcells/name=bosh-openstack-kvm-ubuntu-xenial-go_agent/cid)"
 
